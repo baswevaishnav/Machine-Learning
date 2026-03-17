@@ -49,4 +49,3 @@ plt.show()
 pumpkins_df.groupby(['Month'])['Average Price'].mean().plot(kind='bar')
 plt.ylabel("Pumpkin Price")
 plt.show()
-

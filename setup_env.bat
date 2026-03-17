@@ -1,6 +1,11 @@
 @echo off
 setlocal
 
+REM -------------------------------------------------
+REM Change to project directory
+REM -------------------------------------------------
+cd /d "C:\Users\VBaswe\Practice\Machine-Learning"
+echo Working directory: %CD%
 
 REM -------------------------------------------------
 REM Check if Python 3.14 exists
