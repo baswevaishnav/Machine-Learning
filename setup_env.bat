@@ -1,120 +1,104 @@
 @echo off
+setlocal
 
-REM Set the target project directory
-SET PROJECT_DIR=C:\Users\VBaswe\Practice\Machine-Learning
 
-REM Set log file location
-SET LOG_FILE=%PROJECT_DIR%\setup_log.txt
+REM -------------------------------------------------
+REM Check if Python 3.14 exists
+REM -------------------------------------------------
 
-REM Clear old log and start fresh
-echo. > "%LOG_FILE%"
+echo Checking for Python 3.14...
 
-REM Helper: log to both screen and file
-REM We'll use a simple approach - echo and append to log
+py -3.14 --version >nul 2>&1
 
-echo ============================= 
-echo  Python Virtual Environment Setup
-echo =============================
-echo ============================= >> "%LOG_FILE%"
-echo  Python Virtual Environment Setup >> "%LOG_FILE%"
-echo ============================= >> "%LOG_FILE%"
-
-REM Log date and time
-echo [INFO] Date: %DATE% >> "%LOG_FILE%"
-echo [INFO] Time: %TIME% >> "%LOG_FILE%"
-echo [INFO] Date: %DATE%
-echo [INFO] Time: %TIME%
-echo. >> "%LOG_FILE%"
-
-REM Navigate to project directory
-echo [STEP 1] Navigating to project directory...
-echo [STEP 1] Navigating to project directory... >> "%LOG_FILE%"
-
-cd /d "%PROJECT_DIR%"
-
-IF ERRORLEVEL 1 (
-    echo [FAILED] Directory not found: %PROJECT_DIR%
-    echo [FAILED] Directory not found: %PROJECT_DIR% >> "%LOG_FILE%"
-    echo [FAILED] Batch file stopped. >> "%LOG_FILE%"
+IF %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo ERROR: Python 3.14 is not installed.
+    echo Please install Python 3.14 from:
+    echo https://www.python.org/downloads/
+    echo.
     pause
     exit /b 1
 )
 
-echo [OK] Now in: %PROJECT_DIR%
-echo [OK] Now in: %PROJECT_DIR% >> "%LOG_FILE%"
-echo. >> "%LOG_FILE%"
+echo Python 3.14 detected.
 
-REM Check and delete existing venv
-echo [STEP 2] Checking for existing virtual environment...
-echo [STEP 2] Checking for existing virtual environment... >> "%LOG_FILE%"
+REM Delete existing venv
 
 IF EXIST venv (
-    echo [FOUND] Existing venv detected. Deleting...
-    echo [FOUND] Existing venv detected. Deleting... >> "%LOG_FILE%"
+    echo Removing existing virtual environment...
     rmdir /s /q venv
-    echo [OK] Old environment deleted.
-    echo [OK] Old environment deleted. >> "%LOG_FILE%"
-) ELSE (
-    echo [INFO] No existing environment found.
-    echo [INFO] No existing environment found. >> "%LOG_FILE%"
 )
-echo. >> "%LOG_FILE%"
 
-REM Create new virtual environment
-echo [STEP 3] Creating new virtual environment...
-echo [STEP 3] Creating new virtual environment... >> "%LOG_FILE%"
+REM Create new venv using Python 3.14
 
-py -m venv venv
+echo Creating virtual environment...
 
-IF ERRORLEVEL 1 (
-    echo [FAILED] Could not create virtual environment. Is Python installed?
-    echo [FAILED] Could not create virtual environment. Is Python installed? >> "%LOG_FILE%"
-    echo [FAILED] Batch file stopped. >> "%LOG_FILE%"
+py -3.14 -m venv venv
+
+IF %ERRORLEVEL% NEQ 0 (
+    echo Failed to create virtual environment.
     pause
     exit /b 1
 )
 
-echo [OK] Virtual environment created successfully.
-echo [OK] Virtual environment created successfully. >> "%LOG_FILE%"
-echo. >> "%LOG_FILE%"
+REM -------------------------------------------------
+REM Activate environment
+REM -------------------------------------------------
 
-REM Activate the environment
-echo [STEP 4] Activating virtual environment...
-echo [STEP 4] Activating virtual environment... >> "%LOG_FILE%"
+echo Activating virtual environment...
 
-call "%PROJECT_DIR%\venv\Scripts\activate.bat"
+call venv\Scripts\activate
 
-echo [OK] Virtual environment is now ACTIVE.
-echo [OK] Virtual environment is now ACTIVE. >> "%LOG_FILE%"
-echo. >> "%LOG_FILE%"
+REM -------------------------------------------------
+REM Verify Python version
+REM -------------------------------------------------
 
-REM Log Python path
-echo [STEP 5] Verifying Python path...
-echo [STEP 5] Verifying Python path... >> "%LOG_FILE%"
+echo Verifying Python version...
 
-FOR /F "tokens=*" %%i IN ('where python') DO (
-    echo [OK] Python path: %%i
-    echo [OK] Python path: %%i >> "%LOG_FILE%"
+python --version
+
+FOR /F "tokens=2 delims= " %%G IN ('python --version') DO set PYVER=%%G
+
+echo Detected Python version: %PYVER%
+
+echo %PYVER% | findstr /B "3.14" >nul
+
+IF %ERRORLEVEL% NEQ 0 (
+    echo ERROR: Virtual environment is not using Python 3.12
+    pause
+    exit /b 1
 )
-echo. >> "%LOG_FILE%"
 
-REM Log installed packages
-echo [STEP 6] Listing installed packages...
-echo [STEP 6] Listing installed packages... >> "%LOG_FILE%"
+REM -------------------------------------------------
+REM Upgrade pip
+REM -------------------------------------------------
 
-pip list >> "%LOG_FILE%" 2>&1
-pip list
+echo Upgrading pip...
 
-echo. >> "%LOG_FILE%"
-echo ============================= >> "%LOG_FILE%"
-echo [SUCCESS] Setup completed: %DATE% %TIME% >> "%LOG_FILE%"
-echo ============================= >> "%LOG_FILE%"
+python -m pip install --upgrade pip
+
+REM -------------------------------------------------
+REM Install requirements
+REM -------------------------------------------------
+
+echo Installing dependencies...
+
+pip install -r requirements.txt
+
+IF %ERRORLEVEL% NEQ 0 (
+    echo Failed to install dependencies.
+    pause
+    exit /b 1
+)
 
 echo.
-echo =============================
-echo  Setup Complete! Happy Coding
-echo =============================
+echo ==========================================
+echo Environment setup complete!
+echo ==========================================
 echo.
-echo [LOG] Log saved to: %LOG_FILE%
-echo Open setup_log.txt in VS Code to review.
+
+echo Virtual environment is ACTIVE.
+echo To activate later run:
+echo venv\Scripts\activate
+
 pause
