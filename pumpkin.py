@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 #Reading csv file
 pumpkins = pd.read_csv('C:/Users/VBaswe/Practice/Machine-Learning/US-pumpkins.csv')
@@ -93,3 +98,67 @@ print(pie_pumpkins['Day of Year'].corr(pie_pumpkins['Average Price']))
 
 #Calculate the correlation between Month and Price
 print(pie_pumpkins['Month'].corr(pie_pumpkins['Average Price']))
+
+#Get the day of the year and price in separte arrays
+X = pie_pumpkins['Day of Year'].to_numpy().reshape(-1,1)
+Y = pie_pumpkins['Average Price']
+
+#Print the shape
+print(X.shape)
+
+#Split the data into training and testing data 
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=0.2, random_state=0)
+
+#Create a linear regression object
+lin_reg = LinearRegression()
+
+#Train the model using our training data
+lin_reg.fit(X_train,Y_train)
+
+#Test the model using our test data
+prediction = lin_reg.predict(X_test)
+print(prediction)
+
+#Calculate mean squared error
+mse = np.sqrt(mean_squared_error(Y_test,prediction))
+
+#Print the mean squared error in an easy format to read
+print(f'Mean error: {mse:3.3} ({mse/np.mean(prediction)*100:3.3}%)')
+
+#Calculate the coefficient of determination
+score = lin_reg.score(X_train,Y_train)
+print(f'Model Determination: ',score)
+
+#Create a scatter plot using our test data
+plt.scatter(X_test,Y_test)
+
+#Add a line to the plot with predictions
+plt.plot(X_test,prediction)
+
+#Print the slopr and intercept
+print(f'y = {lin_reg.coef_[0]}x + {lin_reg.intercept_}')
+plt.show()
+
+lin_reg.predict([[256]])
+
+#Build polynomial regression pipeline
+pipeline = make_pipeline(PolynomialFeatures(2), LinearRegression())
+
+#Use the pipeline to build the model
+pipeline.fit(X_train, Y_train)
+
+#Test model with our test data
+prediction = pipeline.predict(X_test)
+
+#Calculate mean squared error
+mse = np.sqrt(mean_squared_error(Y_test,prediction))
+print(f'Mean error: {mse:3.3} ({mse/np.mean(prediction)*100:3.3}%)')
+
+#Plot the results
+plt.scatter(X_test,Y_test)
+plt.plot(sorted(X_test),pipeline.predict(sorted(X_test)))
+plt.show()
+
+#Score the model
+score = pipeline.score(X_train,Y_train)
+print('Model Determination: ',score)
