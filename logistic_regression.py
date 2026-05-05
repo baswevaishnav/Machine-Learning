@@ -134,3 +134,7 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
 plt.show()
+
+#Area under the curve
+auc = roc_auc_score(Y_test,y_scores[:,1])
+print(auc)
