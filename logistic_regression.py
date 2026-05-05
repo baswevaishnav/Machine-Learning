@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-%matplotlib inline
 import numpy as np
 import seaborn as sns
 from sklearn.preprocessing import OrdinalEncoder
@@ -123,7 +122,7 @@ print(confusion_matrix(Y_test,predictions))
 y_scores = model.predict_proba(X_test)
 
 #Calculating ROC curve
-fpr, tpr, thresholds = roc_curve(Y_test, y_score=[:,1])
+fpr, tpr, thresholds = roc_curve(Y_test, y_scores[:,1])
 
 #Plot ROC curve
 fig = plt.figure(figsize=(6,6))
